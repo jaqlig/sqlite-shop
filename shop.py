@@ -6,26 +6,22 @@ class Main:
         os.system('cls')
         print("Welcome to XYZ shop inventory".center(os.get_terminal_size().columns))
         print("_"*os.get_terminal_size().columns)
-        print("1. Show orders")
-        print("2. Show items")
-        print("3. Show users")
-        print("4. Create new order/item/user")
-        print("5. Modify order/item/user from database")
-        print("6. Delete order/item/user from database")
-        print("0. Create new databse (overwrites current)")
+        print("1. Create new order/item/user")
+        print("2. Read orders/items/users")
+        print("3. Update order/item/user from database")
+        print("4. Delete order/item/user from database")
+        print("0. Create new database (overwrites current)")
         print("To exit just click Enter")
 
     def userAddRow(self):
-        choice = input("1. Add order\n2. Add item\n3. Add user\nEnter to return\n")
+        choice = input("1. Add order\n2. Add item\n3. Add user\nClick enter to return\n")
 
         if choice == "1":
-
             db.getItems()
             item = input("Choose item in order: ")
             db.getUsers()
             user = input("Choose user who placed the order: ")
             db.insertOrder(item, user)
-
 
         elif choice == "2":
             name = input("Name of item: ")
@@ -37,10 +33,78 @@ class Main:
             name = input("Name of user: ")
             phone = input("Phone number: ")
             address = input("Address: ")
-            db.insertItem(name, phone, address)
+            db.insertUser(name, phone, address)
 
         else:
-            return    
+            return
+
+    def userRead(self):
+        choice = input("1. Show orders\n2. Show items\n3. Show users\nClick enter to return\n")
+
+        if choice == "1":
+            db.getOrders()
+
+        elif choice == "2":
+            db.getItems()
+
+        elif choice == "3":
+            db.getUsers()
+
+        else:
+            return
+
+    def userUpdate(self):
+        choice = input("1. Update order\n2. Update item\n3. Update user\nClick enter to return\n")
+
+        if choice == "1":
+            db.getOrders()
+            id = input("Which element?: ")
+
+            db.getItems()
+            item = input("Update with which item?: ")
+            db.getUsers()
+            user = input("New user: ")
+            db.updateOrder(id, item, user)
+
+        elif choice == "2":
+            db.getItems()
+            id = input("Which element?: ")
+
+            name = input("New item name: ")
+            quantity = input("How many in stock?: ")
+            price = input("New price: ") 
+            db.updateItem(id, name, quantity, price)
+        
+        elif choice == "3":
+            db.getUsers()
+            id = input("Which element?: ")
+
+            name = input("New user name: ")
+            phone = input("Phone: ")
+            address = input("Address: ") 
+            db.updateUser(id, name, phone, address)
+
+
+    def userDelete(self):
+        choice = input("1. Delete order\n2. Delete item\n3. Delete user\nClick enter to return\n")
+
+        if choice == "1":
+            db.getOrders()
+            table = "orders"
+
+        elif choice == "2":
+            db.getItems()
+            table = "items"
+
+        elif choice == "3":
+            db.getUsers()
+            table = "users"
+
+        else:
+            return
+
+        row = input("Which row whould you like to delete?: ")
+        db.deleteFromTable(table, row)
 
 
 class dbHandler:
@@ -67,6 +131,12 @@ class dbHandler:
         row = self.conn.execute("SELECT * FROM items;")
         for i in row: 
             print(i[0], i[1], i[2], i[3])
+        
+    def updateItem(self, id, name, quantity, price):
+        name = "'" + name + "'"
+        query = "UPDATE items SET name = " + name + ", quantity = " + quantity + ", price = " + price + " WHERE id = " + id + ";"
+        self.conn.execute(query)
+        self.conn.commit()
 
     def insertUser(self, name, phone, address):
         name = "'" + name + "',"
@@ -81,6 +151,14 @@ class dbHandler:
         for i in row:
             print(i[0], i[1], i[2], i[3])
 
+    def updateUser(self, id, name, phone, address):
+        name = "'" + name + "'"
+        address = "'" + address + "'"
+        phone = "'" + phone + "'"
+        query = "UPDATE users SET name = " + name + ", phone = " + phone + ", address = " + address + " WHERE id = " + id + ";"
+        self.conn.execute(query)
+        self.conn.commit()
+
     def insertOrder(self, item, user):
         item = "'" + item + "',"
         user = "'" + user + "'"
@@ -93,6 +171,17 @@ class dbHandler:
 
         for i in row:
             print(i[0], i[1], i[2])
+
+    def updateOrder(self, id, item, user):
+        query = "UPDATE orders SET item = " + item + ", user = " + user + " WHERE id = " + id + ";"
+        self.conn.execute(query)
+        self.conn.commit()
+
+
+    def deleteFromTable(self, table, row):
+        query = "DELETE FROM " + table + " WHERE id = " + row + ";"
+        self.conn.execute(query)
+        self.conn.commit()
        
 
 main = Main()
@@ -111,23 +200,23 @@ while True:
         continue
 
     if option == "1":
-        db.getOrders()
-        input("Press Enter to continue...")
+        main.userAddRow()
+        input("Added...")
         continue
 
     if option == "2":
-        db.getItems()
+        main.userRead()
         input("Press Enter to continue...")
         continue
 
     if option == "3":
-        db.getUsers()
-        input("Press Enter to continue...")
+        main.userUpdate()
+        input("Row updated...")
         continue
 
     if option == "4":
-        main.userAddRow()
-        input("Added...")
+        main.userDelete()
+        input("Row deleted...")
         continue
 
     else:
