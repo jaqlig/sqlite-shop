@@ -15,6 +15,33 @@ class Main:
         print("0. Create new databse (overwrites current)")
         print("To exit just click Enter")
 
+    def userAddRow(self):
+        choice = input("1. Add order\n2. Add item\n3. Add user\nEnter to return\n")
+
+        if choice == "1":
+
+            db.getItems()
+            item = input("Choose item in order: ")
+            db.getUsers()
+            user = input("Choose user who placed the order: ")
+            db.insertOrder(item, user)
+
+
+        elif choice == "2":
+            name = input("Name of item: ")
+            quantity = input("Quantity: ")
+            price = input("Price: ")
+            db.insertItem(name, quantity, price)
+        
+        elif choice == "3":
+            name = input("Name of user: ")
+            phone = input("Phone number: ")
+            address = input("Address: ")
+            db.insertItem(name, phone, address)
+
+        else:
+            return    
+
 
 class dbHandler:
     def __init__(self):
@@ -38,7 +65,7 @@ class dbHandler:
     
     def getItems(self):        
         row = self.conn.execute("SELECT * FROM items;")
-        for i in row:
+        for i in row: 
             print(i[0], i[1], i[2], i[3])
 
     def insertUser(self, name, phone, address):
@@ -54,15 +81,16 @@ class dbHandler:
         for i in row:
             print(i[0], i[1], i[2], i[3])
 
-    def insertOder(self, item, user):
+    def insertOrder(self, item, user):
         item = "'" + item + "',"
         user = "'" + user + "'"
         query = "INSERT INTO orders (item, user) VALUES(" + item + user + ") ;"
         self.conn.execute(query)
         self.conn.commit()
     
-    def getOrders(self):        
-        row = self.conn.execute("SELECT * FROM orders;")
+    def getOrders(self):
+        row = self.conn.execute("SELECT o.id, i.name, u.name FROM orders o, items i, users u WHERE o.item = i.id AND o.user = u.id;")
+
         for i in row:
             print(i[0], i[1], i[2])
        
@@ -79,7 +107,7 @@ while True:
         # test values
         db.insertItem("Milk", "22", "2.44")
         db.insertUser("Adam", "123456789", "London")
-        db.insertOder("1","1")
+        db.insertOrder("1","1")
         continue
 
     if option == "1":
@@ -95,6 +123,11 @@ while True:
     if option == "3":
         db.getUsers()
         input("Press Enter to continue...")
+        continue
+
+    if option == "4":
+        main.userAddRow()
+        input("Added...")
         continue
 
     else:
