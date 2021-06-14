@@ -132,7 +132,7 @@ class dbHandler:
     def getItems(self):        
         row = self.conn.execute("SELECT * FROM items;")
         for i in row: 
-            print(i[0], i[1], i[2], i[3])
+            print("ID:", i[0], "| name:", i[1], "| in-stock:", i[2], "| unit price:", i[3])
         
     def updateItem(self, id, name, quantity, price):
         name = "'" + name + "'"
@@ -151,7 +151,7 @@ class dbHandler:
     def getUsers(self):        
         row = self.conn.execute("SELECT * FROM users;")
         for i in row:
-            print(i[0], i[1], i[2], i[3])
+            print("ID:", i[0], "| name:", i[1], "| phone: ", i[2], "| address:", i[3])
 
     def updateUser(self, id, name, phone, address):
         name = "'" + name + "'"
@@ -176,7 +176,7 @@ class dbHandler:
         row = self.conn.execute("SELECT o.id, i.name, u.name, o.quantity, i.price*o.quantity FROM orders o, items i, users u WHERE o.item = i.id AND o.user = u.id;")
 
         for i in row:
-            print("ID:", i[0], "item:", i[1], "buyer:", i[2], "quantity:", i[3], "order value:", i[4])
+            print("ID:", i[0], "| item:", i[1], "| buyer:", i[2], "| quantity:", i[3], "| order value:", i[4])
 
     def updateOrder(self, id, item, user, quantity):
         query = "UPDATE orders SET item = " + item + ", user = " + user + ", quantity = " + quantity + " WHERE id = " + id + ";"
