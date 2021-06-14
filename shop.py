@@ -21,7 +21,8 @@ class Main:
             item = input("Choose item in order: ")
             db.getUsers()
             user = input("Choose user who placed the order: ")
-            db.insertOrder(item, user)
+            quantity = input("Quantity: ")
+            db.insertOrder(item, user, quantity)
 
         elif choice == "2":
             name = input("Name of item: ")
@@ -64,7 +65,8 @@ class Main:
             item = input("Update with which item?: ")
             db.getUsers()
             user = input("New user: ")
-            db.updateOrder(id, item, user)
+            quantity = input("Quantity: ")
+            db.updateOrder(id, item, user, quantity)
 
         elif choice == "2":
             db.getItems()
@@ -117,7 +119,7 @@ class dbHandler:
         self.conn.execute("DROP TABLE IF EXISTS orders;")
         self.conn.execute("CREATE TABLE items(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, quantity INT, price FLOAT);")
         self.conn.execute("CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, phone VARCHAR(20), address VARCHAR(50));")
-        self.conn.execute("CREATE TABLE orders(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, item INTEGER, user INTEGER, FOREIGN KEY(item) REFERENCES items(id), FOREIGN KEY(user) REFERENCES users(id));")
+        self.conn.execute("CREATE TABLE orders(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, item INTEGER, user INTEGER, quantity INT, FOREIGN KEY(item) REFERENCES items(id), FOREIGN KEY(user) REFERENCES users(id));")
 
     def insertItem(self, name, quantity, price):
         name = "'" + name + "',"
@@ -159,24 +161,27 @@ class dbHandler:
         self.conn.execute(query)
         self.conn.commit()
 
-    def insertOrder(self, item, user):
+    def insertOrder(self, item, user, quantity):
+        item2 = "'" + item + "'"
         item = "'" + item + "',"
-        user = "'" + user + "'"
-        query = "INSERT INTO orders (item, user) VALUES(" + item + user + ") ;"
+        user = "'" + user + "',"
+        quantity = "'" + quantity + "'"
+        query = "INSERT INTO orders (item, user, quantity) VALUES(" + item + user + quantity + ") ;"
+        itemQuery = "UPDATE items SET quantity = quantity - " + quantity + " WHERE id = " + item2 + ";"
         self.conn.execute(query)
+        self.conn.execute(itemQuery)
         self.conn.commit()
     
     def getOrders(self):
-        row = self.conn.execute("SELECT o.id, i.name, u.name FROM orders o, items i, users u WHERE o.item = i.id AND o.user = u.id;")
+        row = self.conn.execute("SELECT o.id, i.name, u.name, o.quantity, i.price*o.quantity FROM orders o, items i, users u WHERE o.item = i.id AND o.user = u.id;")
 
         for i in row:
-            print(i[0], i[1], i[2])
+            print("ID:", i[0], "item:", i[1], "buyer:", i[2], "quantity:", i[3], "order value:", i[4])
 
-    def updateOrder(self, id, item, user):
-        query = "UPDATE orders SET item = " + item + ", user = " + user + " WHERE id = " + id + ";"
+    def updateOrder(self, id, item, user, quantity):
+        query = "UPDATE orders SET item = " + item + ", user = " + user + ", quantity = " + quantity + " WHERE id = " + id + ";"
         self.conn.execute(query)
         self.conn.commit()
-
 
     def deleteFromTable(self, table, row):
         query = "DELETE FROM " + table + " WHERE id = " + row + ";"
@@ -196,7 +201,7 @@ while True:
         # test values
         db.insertItem("Milk", "22", "2.44")
         db.insertUser("Adam", "123456789", "London")
-        db.insertOrder("1","1")
+        db.insertOrder("1","1","7")
         continue
 
     if option == "1":
